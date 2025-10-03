@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        arch: [x86_64, x86_64-musl, aarch64, aarch64-musl]
+        arch: [x86_64]
 
     env:
       TARGET_ARCH: ${{ matrix.arch }}
