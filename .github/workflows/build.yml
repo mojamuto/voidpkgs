@@ -12,11 +12,11 @@ jobs:
 
     strategy:
       matrix:
-        arch: [x86_64]
+        arch: [x86_64, x86_64-musl, aarch64, aarch64-musl]
 
     env:
       TARGET_ARCH: ${{ matrix.arch }}
-      SCRIPT_DIR: "/work/voidpkgs/scripts"
+      SCRIPT_DIR: scripts
 
     steps:
       - name: Checkout repo
@@ -24,12 +24,6 @@ jobs:
 
       - name: Prepare environment
         run: bash ${{ env.SCRIPT_DIR }}/set-environment.sh
-
-      - name: Clone voidpkgs repo
-        run: |
-          mkdir -p /work
-          cd /work
-          git clone https://github.com/${{ github.repository_owner }}/voidpkgs.git
 
       - name: Build changed packages
         run: bash ${{ env.SCRIPT_DIR }}/build-packages.sh
