@@ -1,52 +1,68 @@
-name: Build XBPS packages
+name: Build XBPS Packages
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Build modified packages
     runs-on: ubuntu-latest
+
     container:
-      image: ghcr.io/void-linux/void-glibc-full:20250901r1
+      image: ghcr.io/void-linux/void-glibc-full:20250227R1
+      options: --platform linux/amd64 --privileged
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install git (required inside the container)
-        run: xbps-install -Sy git
-
-      - name: Detect changed templates
+      - name: Detect changed packages
         id: changes
         run: |
-          echo "changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f2 | sort -u)" >> $GITHUB_OUTPUT
+          echo "changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^srcpkgs/' | cut -d/ -f2 | sort -u)" >> $GITHUB_OUTPUT
+          echo "Changed packages: ${{ steps.changes.outputs.changed }}"
 
-      - name: Setup Void packages build environment
+      - name: Install xbps tools
+        run: |
+          mkdir -p /etc/xbps.d
+          cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
+          xbps-install -Syu xbps xbps-src git sudo bash -y
+
+      - name: Bootstrap void-packages
         run: |
           git clone https://github.com/void-linux/void-packages.git
           cd void-packages
           ./xbps-src binary-bootstrap
 
-      - name: Build packages
+      - name: Copy modified packages
         run: |
           cd void-packages
           for pkg in ${{ steps.changes.outputs.changed }}; do
             if [ -f "../srcpkgs/$pkg/template" ]; then
               cp -r ../srcpkgs/$pkg srcpkgs/
+            fi
+          done
+
+      - name: Build modified packages
+        run: |
+          cd void-packages
+          for pkg in ${{ steps.changes.outputs.changed }}; do
+            if [ -d "srcpkgs/$pkg" ]; then
               ./xbps-src pkg $pkg
             fi
           done
 
-      - name: Prepare repo
+      - name: Prepare repo branch
         run: |
           mkdir -p repo
-          cp void-packages/hostdir/binpkgs/*/*.xbps repo/
-          cp void-packages/hostdir/binpkgs/*/*.xbps.sig repo/
-          xbps-rindex -a repo/*.xbps
+          cp void-packages/hostdir/binpkgs/*/*.xbps repo/ || true
+          cp void-packages/hostdir/binpkgs/*/*.xbps.sig repo/ || true
+          xbps-rindex -a repo/*.xbps || true
 
-      - name: Push repo branch
+      - name: Push to binpkgs branch
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
@@ -54,5 +70,5 @@ jobs:
           git checkout -B binpkgs
           cp -r repo/* .
           git add .
-          git commit -m "Update repo with new packages" || true
+          git commit -m "Update binpkgs" || true
           git push origin binpkgs --force
