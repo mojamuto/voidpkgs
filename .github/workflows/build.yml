@@ -22,11 +22,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Make scripts executable
+        run: chmod +x ${{ env.SCRIPT_DIR }}/*
+
       - name: Prepare environment
-        run: bash ${{ env.SCRIPT_DIR }}/set-environment.sh
+        run: ${{ env.SCRIPT_DIR }}/set-environment
 
       - name: Build changed packages
-        run: bash ${{ env.SCRIPT_DIR }}/build-packages.sh
+        run: ${{ env.SCRIPT_DIR }}/build-packages
 
-      - name: Push binpkgs
-        run: bash ${{ env.SCRIPT_DIR }}/push-repo.sh
+      - name: Push compiled packages
+        run: ${{ env.SCRIPT_DIR }}/push-repository
