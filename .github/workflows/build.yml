@@ -9,13 +9,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: voidlinux/void-glibc
+      image: ghcr.io/void-linux/void-glibc-full:20250901r1
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install git (necesario dentro del contenedor)
+      - name: Install git (required inside the container)
         run: xbps-install -Sy git
 
       - name: Detect changed templates
