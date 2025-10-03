@@ -14,10 +14,11 @@ jobs:
       - name: Detect changed templates
         id: changed
         run: |
-          # Busca templates modificados en el último commit (o push completo)
           git fetch origin main
-          changed=$(git diff --name-only HEAD^ HEAD | grep 'srcpkgs/.*/template' || true)
+          changed=$(git diff --name-only origin/main...HEAD | grep 'srcpkgs/.*/template' || true)
           echo "changed=$changed" >> $GITHUB_OUTPUT
+          echo "Templates cambiados:"
+          echo "$changed"
 
       - name: Install deps
         if: steps.changed.outputs.changed != ''
@@ -40,15 +41,14 @@ jobs:
             pkg=$(basename $(dirname $t))
             echo ">> Compilando $pkg"
             ./xbps-src pkg $pkg || exit 1
-            cp hostdir/binpkgs/*/*.xbps ../repo/
           done
 
       - name: Generate repo index
         if: steps.changed.outputs.changed != ''
         run: |
-          cd repo
+          cd void-packages/hostdir/binpkgs
           xbps-rindex -a *.xbps
-          # si usas firma:
+          # Si quieres firmar:
           # xbps-rindex --sign --signedby "TuNombre" -a *.xbps
 
       - name: Deploy to GitHub Pages
@@ -56,4 +56,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./repo
+          publish_dir: ./void-packages/hostdir/binpkgs
