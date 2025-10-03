@@ -1,35 +1,59 @@
-name: Build XBPS Packages
+name: Build changed XBPS packages
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        arch: [x86_64, x86_64-musl, aarch64, aarch64-musl]
-
-    env:
-      TARGET_ARCH: ${{ matrix.arch }}
-      SCRIPT_DIR: scripts
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Make scripts executable
-        run: chmod +x ${{ env.SCRIPT_DIR }}/*
+      - name: Detect changed templates
+        id: changed
+        run: |
+          # Busca templates modificados en el último commit (o push completo)
+          git fetch origin main
+          changed=$(git diff --name-only HEAD^ HEAD | grep 'srcpkgs/.*/template' || true)
+          echo "changed=$changed" >> $GITHUB_OUTPUT
 
-      - name: Prepare environment
-        run: ${{ env.SCRIPT_DIR }}/set-environment
+      - name: Install deps
+        if: steps.changed.outputs.changed != ''
+        run: |
+          sudo apt update
+          sudo apt install -y xz-utils git curl
 
-      - name: Build changed packages
-        run: ${{ env.SCRIPT_DIR }}/build-packages
+      - name: Setup void-packages
+        if: steps.changed.outputs.changed != ''
+        run: |
+          git clone https://github.com/void-linux/void-packages.git
+          cd void-packages
+          ./xbps-src binary-bootstrap
 
-      - name: Push compiled packages
-        run: ${{ env.SCRIPT_DIR }}/push-repository
+      - name: Build only changed packages
+        if: steps.changed.outputs.changed != ''
+        run: |
+          cd void-packages
+          for t in ${{ steps.changed.outputs.changed }}; do
+            pkg=$(basename $(dirname $t))
+            echo ">> Compilando $pkg"
+            ./xbps-src pkg $pkg || exit 1
+            cp hostdir/binpkgs/*/*.xbps ../repo/
+          done
+
+      - name: Generate repo index
+        if: steps.changed.outputs.changed != ''
+        run: |
+          cd repo
+          xbps-rindex -a *.xbps
+          # si usas firma:
+          # xbps-rindex --sign --signedby "TuNombre" -a *.xbps
+
+      - name: Deploy to GitHub Pages
+        if: steps.changed.outputs.changed != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
