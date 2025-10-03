@@ -8,17 +8,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: voidlinux/void-glibc
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Install git (necesario dentro del contenedor)
+        run: xbps-install -Sy git
 
       - name: Detect changed templates
         id: changes
         run: |
           echo "changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f2 | sort -u)" >> $GITHUB_OUTPUT
 
-      - name: Setup Void build environment
+      - name: Setup Void packages build environment
         run: |
           git clone https://github.com/void-linux/void-packages.git
           cd void-packages
