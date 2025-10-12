@@ -1,0 +1,14 @@
+# Template file for 'mpvqt'
+pkgname=mpvqt
+version=1.1.1
+revision=1
+build_style=cmake
+configure_args="-DBUILD_TESTING=OFF"
+hostmakedepends="extra-cmake-modules pkg-config qt6-base qt6-declarative"
+makedepends="mpv-devel libglvnd-devel qt6-base-devel qt6-declarative-devel"
+short_desc="Libmpv wrapper for Qt Quick2/Qml"
+maintainer="toadwastoast <toadwastoast@proton.me>"
+license="LGPL-2.1-only, LGPL-3.0-only"
+homepage="https://invent.kde.org/libraries/mpvqt"
+distfiles="https://invent.kde.org/libraries/mpvqt/-/archive/v1.1.1/mpvqt-v1.1.1.tar.gz"
+checksum="bfca509908a6ecd0828b2222a7657c361e32a00630ae5ea6b87e6edbfcc8aa6a"

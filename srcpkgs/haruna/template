@@ -1,0 +1,56 @@
+# Template file for 'haruna'
+pkgname=haruna
+version=1.5.0
+revision=1
+build_style=cmake
+configure_args="-DBUILD_TESTING=OFF \
+-DHARUNA_WITH_YTDLP=ON \
+-DHARUNA_WITH_BREEZE=ON \
+-DKDE_INSTALL_QMLDIR=lib/qt6/qml \
+-DKF6_HOST_TOOLING=/usr/lib/cmake"
+
+hostmakedepends="
+extra-cmake-modules
+qt6-base
+qt6-declarative
+qt6-declarative-host-tools
+kf6-kcoreaddons
+kf6-kconfig
+kf6-kcrash-devel
+KDSingleApplication
+pkg-config
+gettext
+mpvqt
+yt-dlp
+breeze-qt6
+"
+
+makedepends="
+mpv-devel
+ffmpeg6-devel
+qt6-base-devel
+qt6-declarative-devel
+qt6-qt5compat-devel
+kf6-qqc2-desktop-style-devel
+kf6-kconfig-devel
+kf6-kcoreaddons-devel
+kf6-kfilemetadata-devel
+kf6-ki18n-devel
+kf6-kio-devel
+kf6-kirigami-devel
+gettext-devel
+"
+
+depends="
+breeze-qt6
+kf6-sonnet
+kf6-qqc2-desktop-style
+yt-dlp
+"
+
+short_desc="Open source media player built with Qt/QML and libmpv"
+maintainer="toadwastoast <toadwastoast@proton.me>"
+license="GPL-3.0-or-later"
+homepage="https://apps.kde.org/haruna/"
+distfiles="${KDE_SITE}/${pkgname}/${version}/${pkgname}-${version}.tar.xz"
+checksum="d3e74e62f36808868a5ef5253b3ab080674eb702528cf56ab37f7a893e48ef5d"

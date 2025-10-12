@@ -1,0 +1,37 @@
+# Template file for 'plasma-vault'
+pkgname=plasma-vault
+version=6.4.5
+revision=3
+build_style=cmake
+configure_args="-DBUILD_TESTING=OFF" # Desactivar las pruebas como en el PKGBUILD
+hostmakedepends="extra-cmake-modules qt6-tools pkg-config gettext-devel"
+makedepends="
+    glibc-devel
+    kconfig-devel
+    kcoreaddons-devel
+    kdbusaddons-devel
+    ki18n-devel
+    kio-devel
+    kirigami2-devel
+    kf6-kitemmodels-devel
+    kservice-devel
+    kwidgetsaddons-devel
+    libksysguard-devel
+    libplasma-devel
+    kf6-networkmanager-qt-devel
+    plasma-activities-devel
+    plasma-workspace-devel
+    qt6-base-devel
+    qt6-declarative-devel
+"
+depends="
+    fuse
+    gocryptfs
+"
+
+short_desc="Plasma applet and services for creating encrypted vaults"
+maintainer="Orphaned <orphan@voidlinux.org>"
+license="LGPL-2.0-or-later"
+homepage="https://invent.kde.org/plasma/plasma-vault"
+distfiles="${KDE_SITE}/plasma/${version}/${pkgname}-${version}.tar.xz"
+checksum=3a5105be995f0923145038867ea6fcfe45a82e9537eef5a85643db24ffef70f5

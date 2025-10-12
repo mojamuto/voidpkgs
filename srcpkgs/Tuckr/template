@@ -1,0 +1,12 @@
+# Template para 'tuckr'
+pkgname=Tuckr
+version=0.12.0
+revision=1
+build_style=cargo
+homepage="https://github.com/RaphGL/Tuckr"
+license="GPL-3.0"
+maintainer="Tu Nombre <tu.email@ejemplo.com>"
+short_desc="Un gestor de dotfiles superpoderoso, reemplazo de GNU Stow"
+distfiles="${homepage}/archive/${version}.tar.gz"
+checksum="2b0e359185384bcbc0160a2074dbf4c1e8fdde98c4d1a74ccb0a5af7ec753b00"
+hostmakedepends="rust cargo"
